@@ -1,0 +1,180 @@
+name: Update Protos
+
+on:
+  schedule:
+    - cron: '0 0 * * *'
+  workflow_dispatch:
+
+jobs:
+  check:
+    name: Check for updates
+    runs-on: ubuntu-latest
+    outputs:
+      should_run: ${{ steps.check-version.outputs.should_run }}
+      version: ${{ steps.check-version.outputs.version }}
+      cli_url: ${{ steps.check-version.outputs.cli_url }}
+      cli_sha512: ${{ steps.check-version.outputs.cli_sha512 }}
+      protodump_commit: ${{ steps.check-version.outputs.protodump_commit }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Buf
+        uses: bufbuild/buf-action@v1
+        with:
+          setup_only: true
+
+      - name: Check version
+        id: check-version
+        run: |
+          set -euo pipefail
+
+          # Fetch antigravity cli manifest
+          MANIFEST=$(curl -sSL "https://antigravity-cli-auto-updater-974169037036.us-central1.run.app/manifests/linux_amd64.json")
+          CLI_VERSION=$(echo "$MANIFEST" | jq -r '.version')
+          CLI_URL=$(echo "$MANIFEST" | jq -r '.url')
+          CLI_SHA512=$(echo "$MANIFEST" | jq -r '.sha512')
+
+          # Get head commit of protodump (temp branch)
+          PROTODUMP_COMMIT=$(git ls-remote https://github.com/JamaicanMoose/protodump.git refs/heads/temp | awk '{print $1}')
+          if [ -z "$PROTODUMP_COMMIT" ]; then
+            echo "Error: Could not determine HEAD commit of JamaicanMoose/protodump temp branch" >&2
+            exit 1
+          fi
+
+          # Get head commit of this repo
+          AGY_PROTOS_COMMIT="${{ github.sha }}"
+
+          # Construct version string
+          VERSION="${CLI_VERSION}-${PROTODUMP_COMMIT}-${AGY_PROTOS_COMMIT}"
+          echo "Constructed version: ${VERSION}"
+
+          # Check if the version matches the label of the most recent commit on buf.build/agy-protos/agy-protos
+          LATEST_COMMIT=$(buf registry module commit list buf.build/agy-protos/agy-protos --format json 2>/dev/null | jq -r '.commits[0].commit // empty')
+          
+          if [ -n "$LATEST_COMMIT" ]; then
+            LABELS=$(buf registry module label list "buf.build/agy-protos/agy-protos:${LATEST_COMMIT}" --format json 2>/dev/null | jq -r '.labels[].name')
+            echo "Labels on latest BSR commit (${LATEST_COMMIT}):"
+            echo "${LABELS}"
+
+            if echo "${LABELS}" | grep -qFx "${VERSION}"; then
+              echo "Version ${VERSION} is already published on the latest commit. Exiting workflow."
+              echo "should_run=false" >> "$GITHUB_OUTPUT"
+              exit 0
+            fi
+          fi
+
+          echo "New version to publish: ${VERSION}"
+          echo "should_run=true" >> "$GITHUB_OUTPUT"
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+          echo "cli_url=${CLI_URL}" >> "$GITHUB_OUTPUT"
+          echo "cli_sha512=${CLI_SHA512}" >> "$GITHUB_OUTPUT"
+          echo "protodump_commit=${PROTODUMP_COMMIT}" >> "$GITHUB_OUTPUT"
+
+  build-protodump:
+    name: Build protodump
+    needs: check
+    if: needs.check.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Cache protodump binary
+        id: cache-protodump
+        uses: actions/cache@v4
+        with:
+          path: bin/protodump
+          key: protodump-${{ needs.check.outputs.protodump_commit }}
+
+      - name: Setup Go
+        if: steps.cache-protodump.outputs.cache-hit != 'true'
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.23'
+
+      - name: Checkout protodump repository
+        if: steps.cache-protodump.outputs.cache-hit != 'true'
+        uses: actions/checkout@v4
+        with:
+          repository: JamaicanMoose/protodump
+          ref: ${{ needs.check.outputs.protodump_commit }}
+          path: protodump-src
+
+      - name: Build protodump
+        if: steps.cache-protodump.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p bin
+          cd protodump-src
+          make build
+          cp bin/protodump ../bin/protodump
+
+      - name: Upload protodump artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: protodump
+          path: bin/protodump
+
+  download-cli:
+    name: Download Antigravity CLI
+    needs: check
+    if: needs.check.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download and extract CLI
+        run: |
+          mkdir -p cli-extracted
+          curl -sSL -o cli.tar.gz "${{ needs.check.outputs.cli_url }}"
+          if [ -n "${{ needs.check.outputs.cli_sha512 }}" ]; then
+            echo "${{ needs.check.outputs.cli_sha512 }}  cli.tar.gz" | sha512sum -c -
+          fi
+          tar -xzf cli.tar.gz -C cli-extracted
+
+      - name: Upload CLI artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: antigravity-cli
+          path: cli-extracted/antigravity
+
+  push:
+    name: Extract protos and push to Buf
+    needs: [check, build-protodump, download-cli]
+    if: needs.check.outputs.should_run == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download protodump artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: protodump
+          path: bin
+
+      - name: Download Antigravity CLI artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: antigravity-cli
+          path: cli-extracted
+
+      - name: Make binaries executable
+        run: |
+          chmod +x bin/protodump cli-extracted/antigravity
+
+      - name: Extract protos
+        run: |
+          mkdir -p proto
+          ./bin/protodump \
+            -file cli-extracted/antigravity \
+            -output proto \
+            -prune exa.language_server_pb.LanguageServerService \
+            -exclude google.protobuf,google.rpc,pb
+
+      - name: Setup Buf
+        uses: bufbuild/buf-action@v1
+        with:
+          setup_only: true
+          token: ${{ secrets.BUF_TOKEN }}
+
+      - name: Push to Buf Schema Registry
+        env:
+          BUF_TOKEN: ${{ secrets.BUF_TOKEN }}
+        run: |
+          buf push --label main --label "${{ needs.check.outputs.version }}"
