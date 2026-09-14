@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package exa.chat_client_server_pb;
+
+import "third_party/jetski/codeium_common_pb/codeium_common.proto";
+
+option go_package = "third_party/jetski/chat_client_server_pb;chat_client_server_pb";
+
+enum ChatClientRequestStreamClientType {
+  CHAT_CLIENT_REQUEST_STREAM_CLIENT_TYPE_UNSPECIFIED = 0;
+
+  CHAT_CLIENT_REQUEST_STREAM_CLIENT_TYPE_IDE = 1;
+
+  CHAT_CLIENT_REQUEST_STREAM_CLIENT_TYPE_BROWSER = 2 [deprecated = true];
+}
