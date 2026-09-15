@@ -1,0 +1,135 @@
+syntax = "proto3";
+
+package exa.chat_pb;
+
+import "google/protobuf/any.proto";
+
+import "google/protobuf/timestamp.proto";
+
+import "learning/genai/api/interactions/proto/content.proto";
+
+import "third_party/jetski/codeium_common_pb/codeium_common.proto";
+
+import "third_party/jetski/opensearch_clients_pb/model_native_tool_type.proto";
+
+import "third_party/jetski/diff_action_pb/diff_action.proto";
+
+option go_package = "third_party/jetski/opensearch_clients_pb;opensearch_clients_pb";
+
+option java_multiple_files = true;
+
+option java_package = "com.google.thirdparty.jetski.chat";
+
+message ChatMessagePrompt {
+  reserved 15, 16, 23;
+
+  reserved "output_id", "thinking_id";
+
+  string message_id = 1;
+
+  exa.codeium_common_pb.ChatMessageSource source = 2;
+
+  string prompt = 3;
+
+  genai.Struct prompt_struct = 25;
+
+  uint32 num_tokens = 4;
+
+  bool safe_for_code_telemetry = 5 [deprecated = true];
+
+  repeated exa.codeium_common_pb.ChatToolCall tool_calls = 6;
+
+  string tool_call_id = 7;
+
+  PromptCacheOptions prompt_cache_options = 8;
+
+  bool tool_result_is_error = 9;
+
+  repeated exa.codeium_common_pb.ImageData images = 10 [deprecated = true];
+
+  repeated exa.codeium_common_pb.Media media = 19;
+
+  string thinking = 11;
+
+  string raw_thinking = 17;
+
+  string signature = 12 [deprecated = true];
+
+  bytes thinking_signature = 20;
+
+  bool thinking_redacted = 13;
+
+  repeated exa.codeium_common_pb.PromptAnnotationRange prompt_annotation_ranges = 14;
+
+  int32 step_idx = 18;
+
+  repeated int32 merged_step_idxs = 26;
+
+  string provider_assigned_message_id = 21;
+
+  repeated google.protobuf.Any side_channels = 22;
+
+  repeated google.protobuf.Any passback_context = 24;
+}
+
+message PromptCacheOptions {
+  CacheControlType type = 1;
+}
+
+message ChatToolDefinition {
+  string name = 1;
+
+  string description = 2;
+
+  string json_schema_string = 3;
+
+  bool strict = 4;
+
+  repeated string attribution_field_names = 5;
+
+  string server_name = 6;
+
+  string original_name = 7;
+
+  exa.cortex_pb.ModelNativeToolType model_native_tool_type = 8;
+
+  string response_json_schema_string = 9;
+}
+
+message ChatToolChoice {
+  oneof choice {
+    string option_name = 1;
+
+    string tool_name = 2;
+  }
+}
+
+message ChatExperimentStatus {
+  exa.codeium_common_pb.ExperimentKey experiment_key = 1;
+
+  bool enabled = 2;
+}
+
+enum ChatFeedbackType {
+  FEEDBACK_TYPE_UNSPECIFIED = 0;
+
+  FEEDBACK_TYPE_ACCEPT = 1;
+
+  FEEDBACK_TYPE_REJECT = 2;
+
+  FEEDBACK_TYPE_COPIED = 3;
+
+  FEEDBACK_TYPE_ACCEPT_DIFF = 4;
+
+  FEEDBACK_TYPE_REJECT_DIFF = 5;
+
+  FEEDBACK_TYPE_APPLY_DIFF = 6;
+
+  FEEDBACK_TYPE_INSERT_AT_CURSOR = 7;
+}
+
+enum CacheControlType {
+  CACHE_CONTROL_TYPE_UNSPECIFIED = 0;
+
+  CACHE_CONTROL_TYPE_EPHEMERAL = 1;
+}
