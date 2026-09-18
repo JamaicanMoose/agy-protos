@@ -1,0 +1,15 @@
+syntax = "proto3";
+
+package exa.host_bridge_pb;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "third_party/jetski/host_bridge_pb;host_bridge_pb";
+
+message UpdateStatus {
+  string current_version = 1;
+
+  string latest_version = 2;
+
+  bool update_available = 3;
+}
