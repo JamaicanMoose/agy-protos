@@ -1,0 +1,141 @@
+syntax = "proto3";
+
+package google.internal.cloud.code.v1internal;
+
+import "third_party/jetski/codeium_common_pb/model_configs.proto";
+
+import "google/protobuf/struct.proto";
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "third_party/jetski/codeium_common_pb;codeium_common_pb";
+
+option java_multiple_files = true;
+
+option java_outer_classname = "JetskiServiceProto";
+
+option java_package = "com.google.internal.cloud.code.v1internal";
+
+message AgentPlugin {
+  string name = 1;
+
+  string uid = 2;
+
+  string link = 3;
+
+  string description = 4;
+
+  oneof configuration {
+    AgentPluginLocalConfig local = 9;
+
+    AgentPluginRemoteConfig remote = 10;
+  }
+
+  int64 installation_count = 6;
+
+  string trust_level = 7;
+
+  string readme = 8;
+}
+
+message GStaticSource {
+  reserved 2;
+
+  reserved "sha256";
+
+  string link = 1;
+}
+
+message Google3Source {
+  string depot_path = 1;
+}
+
+message BuildWithGooglePlugin {
+  reserved 2;
+
+  reserved "sha256";
+
+  AgentPlugin plugin = 1;
+
+  oneof source {
+    GStaticSource gstatic = 3;
+
+    Google3Source google3 = 5;
+  }
+
+  map<string, string> version_shas = 4;
+
+  Visibility visibility = 6;
+
+  enum Visibility {
+    VISIBILITY_UNSPECIFIED = 0;
+
+    PUBLIC = 1;
+
+    GOOGLE_INTERNAL = 2;
+  }
+}
+
+message AgentPluginLocalConfig {
+  map<string, AgentPluginCommand> commands = 1;
+}
+
+message AgentPluginRemoteConfig {
+  reserved 1;
+
+  reserved "commands";
+
+  AgentPluginRemoteConfigTemplate remote_template = 2;
+}
+
+message AgentPluginRemoteConfigTemplate {
+  string server_url = 1;
+
+  map<string, string> headers = 2;
+
+  string auth_provider_type = 3;
+}
+
+message AgentPluginCommand {
+  AgentPluginCommandTemplate command_template = 1;
+
+  repeated AgentPluginCommandVariable variables = 2;
+}
+
+message AgentPluginCommandTemplate {
+  string command = 1;
+
+  repeated string args = 2;
+
+  map<string, string> env = 3;
+}
+
+message AgentPluginCommandVariable {
+  string name = 1;
+
+  string title = 2;
+
+  string description = 3;
+
+  string link = 4;
+}
+
+message Interaction {
+  oneof interaction_data {
+    NUXInteraction nux_interaction = 1;
+  }
+}
+
+message NUXInteraction {
+  int32 nux_id = 1;
+
+  NUXInteractionType interaction_type = 2;
+}
+
+enum NUXInteractionType {
+  NUX_INTERACTION_TYPE_UNSPECIFIED = 0;
+
+  NUX_INTERACTION_TYPE_DISMISSED = 1;
+
+  NUX_INTERACTION_TYPE_ACCEPTED = 2;
+}
