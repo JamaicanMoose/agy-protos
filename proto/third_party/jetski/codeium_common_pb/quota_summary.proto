@@ -1,0 +1,53 @@
+syntax = "proto3";
+
+package google.internal.cloud.code.v1internal;
+
+import "google/protobuf/timestamp.proto";
+
+option go_package = "third_party/jetski/codeium_common_pb;codeium_common_pb";
+
+option java_multiple_files = true;
+
+option java_outer_classname = "QuotaSummaryProto";
+
+option java_package = "com.google.internal.cloud.code.v1internal";
+
+message RetrieveUserQuotaSummaryRequest {
+  string project = 1;
+}
+
+message QuotaSummaryBucket {
+  string bucket_id = 1;
+
+  string display_name = 2;
+
+  string description = 7;
+
+  string window = 3;
+
+  oneof remaining {
+    float remaining_fraction = 4;
+
+    int64 remaining_amount = 5;
+  }
+
+  bool disabled = 8;
+
+  google.protobuf.Timestamp reset_time = 6;
+}
+
+message QuotaSummaryGroup {
+  string display_name = 2;
+
+  string description = 3;
+
+  repeated QuotaSummaryBucket buckets = 1;
+}
+
+message RetrieveUserQuotaSummaryResponse {
+  repeated QuotaSummaryBucket buckets = 1 [deprecated = true];
+
+  repeated QuotaSummaryGroup groups = 2;
+
+  string description = 3;
+}
