@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package exa.plugin_context_pb;
+
+option go_package = "third_party/jetski/plugin_context_pb;plugin_context_pb";
+
+enum ProbeStatus {
+  PROBE_STATUS_UNSPECIFIED = 0;
+
+  PROBE_STATUS_OK = 1;
+
+  PROBE_STATUS_UNAUTHENTICATED = 2;
+
+  PROBE_STATUS_APPLICATION_VERSION_TOO_LOW = 3;
+
+  PROBE_STATUS_PLUGIN_VERSION_TOO_LOW = 4;
+
+  PROBE_STATUS_ERROR = 5;
+}

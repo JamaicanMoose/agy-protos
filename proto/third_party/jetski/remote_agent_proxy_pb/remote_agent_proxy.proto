@@ -1,0 +1,57 @@
+syntax = "proto3";
+
+package exa.remote_agent_proxy_pb;
+
+import "google/protobuf/timestamp.proto";
+
+import "third_party/jetski/codeium_common_pb/codeium_common.proto";
+
+option go_package = "third_party/jetski/remote_agent_proxy_pb;remote_agent_proxy_pb";
+
+option java_multiple_files = true;
+
+option java_outer_classname = "RemoteAgentProxySharedProto";
+
+option java_package = "com.exafunction.codeium.remoteagentproxy";
+
+message ResourceProviderInfo {
+  string type = 1;
+
+  string display_name = 2;
+
+  string icon_url = 3;
+}
+
+message PluginConnection {
+  string connection_id = 1;
+
+  State state = 2;
+
+  repeated string granted_scopes = 3;
+
+  enum State {
+    STATE_UNSPECIFIED = 0;
+
+    CONNECTED = 1;
+
+    EXPIRED = 2;
+  }
+}
+
+message PluginInfo {
+  string plugin_id = 1;
+
+  string display_name = 2;
+
+  string version = 3;
+
+  string description = 4;
+
+  string logo_uri = 5;
+
+  bool auth_required = 6;
+
+  repeated PluginConnection connections = 7;
+
+  string authorize_uri = 8;
+}
