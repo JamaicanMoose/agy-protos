@@ -1,0 +1,201 @@
+syntax = "proto3";
+
+package exa.remote_agent_proxy_pb;
+
+import "google/protobuf/timestamp.proto";
+
+import "third_party/jetski/codeium_common_pb/codeium_common.proto";
+
+option go_package = "third_party/jetski/remote_agent_proxy_pb;remote_agent_proxy_pb";
+
+option java_multiple_files = true;
+
+option java_outer_classname = "RemoteAgentProxySharedProto";
+
+option java_package = "com.exafunction.codeium.remoteagentproxy";
+
+message Environment {
+  oneof provider {
+    CapsuleConfig capsule = 1;
+
+    AceConfig ace = 3;
+  }
+
+  string execution_identity = 2;
+
+  message CapsuleConfig {
+    string capsule_id = 1;
+  }
+
+  message AceConfig {
+  }
+}
+
+message EnvironmentInfo {
+  oneof provider {
+    Capsule capsule = 1;
+
+    Ace ace = 3;
+  }
+
+  bool is_default = 2;
+
+  ConnectionState connection_state = 4;
+
+  message Capsule {
+    string capsule_id = 1;
+
+    repeated string tags = 2;
+
+    google.protobuf.Timestamp expiration_time = 3;
+  }
+
+  message Ace {
+  }
+
+  enum ConnectionState {
+    CONNECTION_STATE_UNSPECIFIED = 0;
+
+    STARTING = 1;
+
+    CONNECTED = 2;
+
+    DISCONNECTED = 3;
+  }
+}
+
+message ConfigOverrides {
+  exa.codeium_common_pb.Model model = 1;
+}
+
+message FieldSpec {
+  string name = 1;
+
+  string display_name = 2;
+
+  string description = 3;
+
+  bool is_required = 4;
+
+  bool is_repeated = 5;
+
+  string placeholder = 6;
+
+  repeated string allowed_values = 7;
+}
+
+message TriggerOption {
+  string id = 1;
+
+  string display_name = 2;
+
+  string description = 3;
+
+  TriggerCategory category = 4;
+
+  repeated FieldSpec fields = 5;
+}
+
+message FieldValues {
+  repeated string values = 1;
+}
+
+message RemoteTrigger {
+  reserved 2;
+
+  reserved "trigger_source";
+
+  string trigger_id = 1;
+
+  TriggerState state = 3;
+
+  string display_name = 4;
+
+  string prompt = 5;
+
+  repeated string workspace_uris = 6;
+
+  Environment environment = 7;
+
+  ConfigOverrides config_overrides = 8;
+
+  google.protobuf.Timestamp create_time = 9;
+
+  google.protobuf.Timestamp update_time = 10;
+
+  string option_id = 11;
+
+  map<string, FieldValues> fields = 12;
+
+  string summary = 13;
+
+  google.protobuf.Timestamp credential_expiration_time = 14;
+
+  string project_id = 15;
+}
+
+message ResourceProviderInfo {
+  string type = 1;
+
+  string display_name = 2;
+
+  string icon_url = 3;
+}
+
+message PluginConnection {
+  string connection_id = 1;
+
+  State state = 2;
+
+  repeated string granted_scopes = 3;
+
+  string account = 4;
+
+  enum State {
+    STATE_UNSPECIFIED = 0;
+
+    CONNECTED = 1;
+
+    EXPIRED = 2;
+  }
+}
+
+message PluginInfo {
+  string plugin_id = 1;
+
+  string display_name = 2;
+
+  string version = 3;
+
+  string description = 4;
+
+  string logo_uri = 5;
+
+  bool auth_required = 6;
+
+  repeated PluginConnection connections = 7;
+
+  string authorize_uri = 8;
+}
+
+enum TriggerCategory {
+  TRIGGER_CATEGORY_UNSPECIFIED = 0;
+
+  TRIGGER_CATEGORY_TIME = 1;
+
+  TRIGGER_CATEGORY_EVENT = 2;
+}
+
+enum TriggerState {
+  TRIGGER_STATE_UNSPECIFIED = 0;
+
+  TRIGGER_STATE_ACTIVE = 1;
+
+  TRIGGER_STATE_PAUSED = 2;
+
+  TRIGGER_STATE_EXPIRED = 3;
+
+  TRIGGER_STATE_COMPLETED = 4;
+
+  TRIGGER_STATE_ERROR = 5;
+}
