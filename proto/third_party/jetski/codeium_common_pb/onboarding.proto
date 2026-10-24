@@ -1,0 +1,157 @@
+syntax = "proto3";
+
+package google.internal.cloud.code.v1internal;
+
+import "third_party/jetski/codeium_common_pb/credits.proto";
+
+import "google/rpc/status.proto";
+
+option go_package = "third_party/jetski/codeium_common_pb;codeium_common_pb";
+
+option java_multiple_files = true;
+
+option java_outer_classname = "OnboardingProto";
+
+option java_package = "com.google.internal.cloud.code.v1internal";
+
+message ReleaseChannel {
+  ChannelType type = 1;
+
+  string name = 2;
+
+  string description = 3;
+
+  enum ChannelType {
+    UNKNOWN = 0;
+
+    STABLE = 1;
+
+    EXPERIMENTAL = 2;
+  }
+}
+
+message IneligibleTier {
+  IneligibleTierReasonCodes reason_code = 1;
+
+  string reason_message = 2;
+
+  string tier_id = 3;
+
+  string tier_name = 4;
+
+  string validation_error_message = 5;
+
+  string validation_url_link_text = 6;
+
+  string validation_url = 7;
+
+  string validation_learn_more_link_text = 8;
+
+  string validation_learn_more_url = 9;
+
+  enum IneligibleTierReasonCodes {
+    UNKNOWN = 0;
+
+    INELIGIBLE_ACCOUNT = 1;
+
+    UNKNOWN_LOCATION = 2;
+
+    UNSUPPORTED_LOCATION = 3;
+
+    RESTRICTED_NETWORK = 4;
+
+    RESTRICTED_AGE = 5;
+
+    NON_USER_ACCOUNT = 6;
+
+    DASHER_USER = 7;
+
+    BYOID_USER = 8;
+
+    RESTRICTED_DASHER_USER = 9;
+
+    VALIDATION_REQUIRED = 10;
+
+    GOOGLE_TOS_NOT_SUPPORTED_BY_CLIENT = 11;
+
+    UNSUPPORTED_CLIENT = 12;
+  }
+}
+
+message LoadCodeAssistResponse {
+  reserved 10;
+
+  UserTier current_tier = 1;
+
+  repeated UserTier allowed_tiers = 2;
+
+  optional string cloudaicompanion_project = 3;
+
+  optional google.rpc.Status project_validation_error = 4;
+
+  repeated IneligibleTier ineligible_tiers = 5;
+
+  optional bool gcp_managed = 6;
+
+  optional string manage_subscription_uri = 7;
+
+  optional ReleaseChannel release_channel = 8;
+
+  optional string upgrade_subscription_uri = 9;
+
+  optional string g1_tier = 11 [deprecated = true];
+
+  UserTier paid_tier = 12;
+}
+
+message UserTier {
+  reserved 10;
+
+  string id = 1;
+
+  string name = 2;
+
+  string description = 3;
+
+  bool user_defined_cloudaicompanion_project = 4;
+
+  PrivacyNotice privacy_notice = 5;
+
+  bool is_default = 6;
+
+  optional string upgrade_subscription_uri = 7;
+
+  optional string upgrade_subscription_text = 8;
+
+  optional string upgrade_button_text = 11;
+
+  optional string client_experience_tag = 12;
+
+  optional UpgradeType upgrade_subscription_type = 9;
+
+  bool uses_gcp_tos = 13;
+
+  repeated Credits available_credits = 14;
+
+  message PrivacyNotice {
+    reserved 3;
+
+    bool show_notice = 1;
+
+    optional string notice_text = 2;
+
+    bool minor_notice = 4;
+  }
+
+  enum UpgradeType {
+    UPGRADE_TYPE_UNSPECIFIED = 0;
+
+    GDP = 1;
+
+    GOOGLE_ONE = 2;
+
+    GDP_HELIUM = 3;
+
+    GOOGLE_ONE_HELIUM = 4;
+  }
+}
