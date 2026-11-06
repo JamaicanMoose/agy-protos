@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package exa.hooks_pb;
+
+import "google/protobuf/struct.proto";
+
+import "third_party/jetski/codeium_common_pb/codeium_common.proto";
+
+option go_package = "third_party/jetski/hooks_pb;hooks_pb";
+
+option java_multiple_files = true;
+
+option java_outer_classname = "Hooks";
+
+message PreToolHookResult {
+  string decision = 4;
+
+  string reason = 5;
+
+  google.protobuf.Struct overwrite = 3;
+
+  repeated string permission_overrides = 6;
+
+  bool allow_tool = 1 [deprecated = true];
+
+  string deny_reason = 2 [deprecated = true];
+}
