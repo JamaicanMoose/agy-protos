@@ -1,0 +1,37 @@
+syntax = "proto3";
+
+package exa.opensearch_clients_pb;
+
+import "google/protobuf/timestamp.proto";
+
+import "third_party/jetski/opensearch_clients_pb/chat.proto";
+
+import "third_party/jetski/codeium_common_pb/codeium_common.proto";
+
+import "third_party/jetski/index_pb/index.proto";
+
+option go_package = "third_party/jetski/opensearch_clients_pb;opensearch_clients_pb";
+
+message TimeRange {
+  google.protobuf.Timestamp start = 1;
+
+  google.protobuf.Timestamp end = 2;
+}
+
+enum ConnectorType {
+  CONNECTOR_TYPE_UNSPECIFIED = 0;
+
+  CONNECTOR_TYPE_GITHUB = 1;
+
+  CONNECTOR_TYPE_SLACK = 2;
+
+  CONNECTOR_TYPE_GOOGLE_DRIVE = 3;
+
+  CONNECTOR_TYPE_JIRA = 4;
+
+  CONNECTOR_TYPE_CODEIUM = 5;
+
+  CONNECTOR_TYPE_EMAIL = 6;
+
+  CONNECTOR_TYPE_GITHUB_OAUTH = 7;
+}
