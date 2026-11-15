@@ -1,0 +1,19 @@
+syntax = "proto3";
+
+package exa.index_pb;
+
+import "google/protobuf/duration.proto";
+
+import "google/protobuf/timestamp.proto";
+
+import "third_party/jetski/codeium_common_pb/codeium_common.proto";
+
+option go_package = "third_party/jetski/index_pb;index_pb";
+
+message IndexStats {
+  string repository_name = 1;
+
+  int64 file_count = 2;
+
+  int64 code_context_item_count = 3;
+}

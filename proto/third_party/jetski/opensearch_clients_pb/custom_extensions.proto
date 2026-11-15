@@ -1,0 +1,9 @@
+edition = "2024";
+
+package exa.cortex_pb;
+
+option go_package = "third_party/jetski/opensearch_clients_pb;opensearch_clients_pb";
+
+message CustomExtensions {
+  extensions 100 to max;
+}
