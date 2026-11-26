@@ -1,0 +1,63 @@
+syntax = "proto3";
+
+package exa.context_module_pb;
+
+import "third_party/jetski/opensearch_clients_pb/chat.proto";
+
+import "third_party/jetski/codeium_common_pb/codeium_common.proto";
+
+option go_package = "third_party/jetski/opensearch_clients_pb;opensearch_clients_pb";
+
+message RetrievedCodeContextItemMetadata {
+  repeated exa.codeium_common_pb.CodeContextSource context_sources = 1;
+
+  exa.codeium_common_pb.CodeContextType context_type = 2;
+
+  string scorer = 3;
+
+  float score = 4;
+
+  map<string, CodeContextProviderMetadata> provider_metadata = 5;
+
+  bool is_in_pinned_scope = 6;
+}
+
+message CciWithSubrangeWithRetrievalMetadata {
+  exa.codeium_common_pb.CciWithSubrange cci_with_subrange = 1;
+
+  RetrievedCodeContextItemMetadata metadata = 2;
+}
+
+message CodeContextProviderMetadata {
+  float relative_weight = 1;
+}
+
+message ContextModuleResult {
+  reserved 7;
+
+  reserved "browser_state";
+
+  repeated CciWithSubrangeWithRetrievalMetadata retrieved_cci_with_subranges = 1;
+
+  exa.codeium_common_pb.Document active_document = 2;
+
+  exa.codeium_common_pb.DocumentOutline active_document_outline = 5;
+
+  LocalNodeState local_node_state = 3;
+
+  exa.codeium_common_pb.Guideline guideline = 4;
+
+  repeated exa.codeium_common_pb.Document open_documents = 6;
+
+  repeated exa.codeium_common_pb.TerminalShellCommand running_terminal_commands = 8;
+
+  exa.codeium_common_pb.BrowserStateSnapshot browser_state_snapshot = 9;
+}
+
+message LocalNodeState {
+  exa.codeium_common_pb.CodeContextItem current_node = 1;
+
+  exa.codeium_common_pb.CodeContextItem closest_above_node = 2;
+
+  exa.codeium_common_pb.CodeContextItem closest_below_node = 3;
+}
