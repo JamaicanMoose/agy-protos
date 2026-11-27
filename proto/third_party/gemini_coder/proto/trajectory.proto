@@ -1,0 +1,59 @@
+syntax = "proto3";
+
+package gemini_coder;
+
+import "third_party/gemini_coder/cider/proto/trajectory_steps.proto";
+
+import "google/protobuf/any.proto";
+
+import "google/protobuf/timestamp.proto";
+
+import "third_party/jetski/opensearch_clients_pb/cortex.proto";
+
+import "third_party/jetski/opensearch_clients_pb/custom_extensions.proto";
+
+option go_package = "third_party/gemini_coder/proto;proto";
+
+option java_multiple_files = true;
+
+option java_package = "com.google.geminicoder";
+
+message Trajectory {
+  string trajectory_id = 1;
+
+  string cascade_id = 6;
+
+  exa.cortex_pb.CortexTrajectoryType trajectory_type = 4;
+
+  repeated genai.Step steps = 2;
+
+  repeated exa.cortex_pb.CortexTrajectoryReference parent_references = 5;
+
+  repeated exa.cortex_pb.CortexStepGeneratorMetadata generator_metadata = 3;
+
+  repeated exa.cortex_pb.ExecutorMetadata executor_metadatas = 9;
+
+  exa.cortex_pb.CortexTrajectorySource source = 8;
+
+  exa.cortex_pb.CortexTrajectoryMetadata metadata = 7;
+
+  repeated exa.cortex_pb.BattleModeInfo battle_mode_infos = 10;
+}
+
+message TaskDetails {
+  string id = 1;
+
+  string log_uri = 2;
+
+  string progress = 3;
+
+  string description = 4;
+
+  bool is_daemon = 6;
+
+  string title = 7;
+
+  google.protobuf.Timestamp moved_to_background_at = 8;
+
+  bool requires_input_approval = 5 [deprecated = true];
+}
